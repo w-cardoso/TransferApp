@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="custom_component_attributes">
+        <attr name="custom_component_title" format="reference" />
+        <attr name="textHint" format="string" />
+    </declare-styleable>
+</resources>

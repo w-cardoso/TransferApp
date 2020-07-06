@@ -13,7 +13,6 @@ import wevs.com.br.transferapp.validator.EmailValidator
 import wevs.com.br.transferapp.validator.PasswordValidator
 import wevs.com.br.transferapp.validator.ValidatorFields
 
-
 class LoginViewModel : ViewModel() {
     private val repository: LoginRepositoryImplements by lazy { providerLoginReposytory() }
     private val useCase: LoginUseCase by lazy { providerLoginUseCase() }
@@ -24,7 +23,6 @@ class LoginViewModel : ViewModel() {
     val viewEvent: LiveData<LoginEvent> = event
 
     private val validators = ArrayList<ValidatorFields>()
-
 
     fun interpret(interactor: LoginInteractor) {
         when (interactor) {
@@ -43,12 +41,25 @@ class LoginViewModel : ViewModel() {
             is LoginInteractor.SaveDataSharedPreferences -> {
                 saveUserAndPasswordSharedPreferences()
             }
+
+            is LoginInteractor.EnableButtonLogin -> {
+                enableButton()
+            }
+        }
+    }
+
+    private fun enableButton() {
+        if (useCase.validateAllFields(validators) && useCase.ammountFieldsValidate(validators)) {
+            state.postValue(LoginStates.EnableButton)
+        } else {
+            state.postValue(LoginStates.DisableButton)
         }
     }
 
     private fun sendPostLogin(login: Login) {
         GlobalScope.launch {
-            repository.sendLogin(login,
+            repository.sendLogin(
+                login,
                 {
                     if (!useCase.verifyUserAccount(it.userAccount)) {
                         state.postValue(LoginStates.CallSucess(it.userAccount))
@@ -69,6 +80,8 @@ class LoginViewModel : ViewModel() {
             if (!hasFocus) {
                 if (validator.isValid()) {
                     state.postValue(LoginStates.UserSucess(edtUser))
+                } else {
+                    state.postValue(LoginStates.UserError)
                 }
             }
         }
@@ -78,10 +91,13 @@ class LoginViewModel : ViewModel() {
         val validator = PasswordValidator(edtPassword)
         validators.add(validator)
         edtPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) validator.isValid()
-        }
-        if (validator.isValid()) {
-            state.postValue(LoginStates.PasswordSucess(edtPassword))
+            if (!hasFocus) {
+                if (validator.isValid()) {
+                    state.postValue(LoginStates.PasswordSucess(edtPassword))
+                } else {
+                    state.postValue(LoginStates.PasswordError)
+                }
+            }
         }
     }
 
