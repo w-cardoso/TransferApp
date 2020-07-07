@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import wevs.com.br.transferapp.R
+import wevs.com.br.transferapp.model.Login
 import wevs.com.br.transferapp.model.UserAccount
 import wevs.com.br.transferapp.ui.edittext.CustomEditText
 
@@ -14,7 +15,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val edtUser by lazy { findViewById<CustomEditText>(R.id.login_edt_user) }
     private val edtPassword by lazy { findViewById<CustomEditText>(R.id.login_edt_password) }
-    private val bntLogin by lazy { findViewById<Button>(R.id.login_btn) }
+    private val btnLogin by lazy { findViewById<Button>(R.id.login_btn) }
 
     override fun onStart() {
         super.onStart()
@@ -26,6 +27,24 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //viewModel.interpret(LoginInteractor.PostLogin(Login("sadada", "dsadasfasa")))
+        starViewModel()
+        clickListenerBtnLogin()
+    }
+
+    private fun clickListenerBtnLogin() {
+        btnLogin.setOnClickListener {
+            viewModel.interpret(
+                LoginInteractor.PostLogin(
+                    Login(
+                        edtUser.editText.text.toString(),
+                        edtPassword.editText.text.toString()
+                    )
+                )
+            )
+        }
+    }
+
+    private fun starViewModel() {
         viewModel.viewStates.observe(this, Observer { viewStates ->
             viewStates.let {
                 when (it) {
@@ -80,15 +99,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun disableButtonLogin() {
-        bntLogin.isEnabled = false
+        btnLogin.isEnabled = false
     }
 
     private fun enableButtonLogin() {
-        bntLogin.isEnabled = true
+        btnLogin.isEnabled = true
     }
 
     private fun sendLoginError(mesage: String) {
-
+        Toast.makeText(this, mesage, Toast.LENGTH_LONG).show()
     }
 
     private fun sendLogin(user: UserAccount?) {

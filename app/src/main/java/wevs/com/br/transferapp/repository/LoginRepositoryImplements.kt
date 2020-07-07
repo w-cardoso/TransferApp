@@ -15,7 +15,7 @@ class LoginRepositoryImplements(private val loginService: LoginService) : LoginR
     ) {
         loginService.login(login).enqueue(object : Callback<LoginResponse> {
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                TODO("Not yet implemented")
+                onError(t)
             }
 
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
