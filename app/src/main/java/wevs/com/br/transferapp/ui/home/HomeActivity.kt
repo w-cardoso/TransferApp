@@ -14,11 +14,10 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun newIntent(context: Context, userAccount: UserAccount): Intent {
+        fun newIntent(context: Context, userAccount: UserAccount?): Intent {
             val intent = Intent(context, HomeActivity::class.java)
             intent.putExtra("USER_ACCOUNT", userAccount)
             return intent
-
         }
     }
 }

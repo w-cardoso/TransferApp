@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -22,13 +23,18 @@ class CustomEditText @JvmOverloads constructor(
     init {
         LayoutInflater.from(context).inflate(R.layout.custom_edit_text, this, true)
 
-
         val typedArray = context.obtainStyledAttributes(
             attrs,
-            R.styleable.custom_component_attributes, 0, 0
+            R.styleable.custom_edit_text_component_attributes, 0, 0
         )
 
-        editText.hint = typedArray.getString(R.styleable.custom_component_attributes_textHint)
+        with(editText) {
+            hint = typedArray.getString(R.styleable.custom_edit_text_component_attributes_android_hint)
+            inputType = typedArray.getInteger(
+                R.styleable.custom_edit_text_component_attributes_android_inputType,
+                EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE
+            )
+        }
         typedArray.recycle()
     }
 

@@ -9,6 +9,7 @@ import wevs.com.br.transferapp.R
 import wevs.com.br.transferapp.model.Login
 import wevs.com.br.transferapp.model.UserAccount
 import wevs.com.br.transferapp.ui.edittext.CustomEditText
+import wevs.com.br.transferapp.ui.home.HomeActivity
 
 class LoginActivity : AppCompatActivity() {
     private val viewModel by lazy { providerLoginViewModel(this) }
@@ -26,7 +27,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //viewModel.interpret(LoginInteractor.PostLogin(Login("sadada", "dsadasfasa")))
         starViewModel()
         clickListenerBtnLogin()
     }
@@ -111,6 +111,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun sendLogin(user: UserAccount?) {
-        Toast.makeText(this, user?.name, Toast.LENGTH_LONG).show()
+        val intent = HomeActivity.newIntent(this, user)
+        startActivity(intent)
     }
 }
