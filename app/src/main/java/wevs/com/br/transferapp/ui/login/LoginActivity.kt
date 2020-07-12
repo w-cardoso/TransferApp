@@ -10,6 +10,7 @@ import wevs.com.br.transferapp.model.Login
 import wevs.com.br.transferapp.model.UserAccount
 import wevs.com.br.transferapp.ui.edittext.CustomEditText
 import wevs.com.br.transferapp.ui.home.HomeActivity
+import wevs.com.br.transferapp.utils.*
 
 class LoginActivity : AppCompatActivity() {
     private val viewModel by lazy { providerLoginViewModel(this) }
@@ -20,8 +21,17 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.interpret(LoginInteractor.ValidateFieldUser(edtUser.editText))
-        viewModel.interpret(LoginInteractor.ValidateFieldPassword(edtPassword.editText))
+        val (username, password) = startSecurePreferences()
+        viewModel.interpret(LoginInteractor.GetValuesUserAndPassword(username, password))
+    }
+
+    private fun startSecurePreferences(): Pair<String?, String?> {
+        val preferences = SecurePreferences(
+            this, PREFERENCE_NAME, SECURE_KEY, true
+        )
+        val username = preferences.getString(USER_SECURE_PREFERENCES)
+        val password = preferences.getString(PASSWORD_SECURE_PREFERENCES)
+        return Pair(username, password)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +58,17 @@ class LoginActivity : AppCompatActivity() {
         viewModel.viewStates.observe(this, Observer { viewStates ->
             viewStates.let {
                 when (it) {
+                    is LoginStates.GetValuesSharedPreference -> {
+                        populateEditText(it.user, it.password)
+                    }
+
                     is LoginStates.CallSucess -> {
+                        viewModel.interpret(
+                            LoginInteractor.SaveDataSharedPreferences(
+                                edtUser.editText.text.toString(),
+                                edtPassword.editText.text.toString()
+                            )
+                        )
                         sendLogin(it.user)
                     }
                     is LoginStates.CallError -> {
@@ -74,10 +94,30 @@ class LoginActivity : AppCompatActivity() {
                     is LoginStates.DisableButton -> {
                         disableButtonLogin()
                     }
+
+                    is LoginStates.SaveLoginSecurePreferences -> {
+                        saveUserPassword(it.user, it.password)
+                    }
+
+                    is LoginStates.SharePreferencesEmpty -> {
+                        securePreferencesEmpty()
+                    }
                 }
             }
 
         })
+    }
+
+    private fun securePreferencesEmpty() {
+        viewModel.interpret(LoginInteractor.ValidateFieldUser(edtUser.editText))
+        viewModel.interpret(LoginInteractor.ValidateFieldPassword(edtPassword.editText))
+    }
+
+    private fun populateEditText(user: String?, password: String?) {
+        edtUser.editText.setText(user)
+        edtPassword.editText.setText(password)
+        viewModel.interpret(LoginInteractor.ValidateFieldUser(edtUser.editText))
+        viewModel.interpret(LoginInteractor.ValidateFieldPassword(edtPassword.editText))
     }
 
     private fun userOk() {
@@ -87,6 +127,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun userNok() {
         edtUser.showError()
+        disableButtonLogin()
     }
 
     private fun passwordOk() {
@@ -96,6 +137,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun passwordNok() {
         edtPassword.showError()
+        disableButtonLogin()
     }
 
     private fun disableButtonLogin() {
@@ -114,4 +156,12 @@ class LoginActivity : AppCompatActivity() {
         val intent = HomeActivity.newIntent(this, user)
         startActivity(intent)
     }
+
+    private fun saveUserPassword(user: String?, password: String?) {
+        val preferences =
+            SecurePreferences(this, PREFERENCE_NAME, SECURE_KEY, true)
+        preferences.put(USER_SECURE_PREFERENCES, user)
+        preferences.put(PASSWORD_SECURE_PREFERENCES, password)
+    }
+
 }

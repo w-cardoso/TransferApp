@@ -38,13 +38,31 @@ class LoginViewModel : ViewModel() {
                 validateFieldPassword(interactor.password)
             }
 
-            is LoginInteractor.SaveDataSharedPreferences -> {
-                saveUserAndPasswordSharedPreferences()
-            }
-
             is LoginInteractor.EnableButtonLogin -> {
                 enableButton()
             }
+
+            is LoginInteractor.GetValuesUserAndPassword -> {
+                getValuesSharedPreferences(interactor.username, interactor.password)
+            }
+
+            is LoginInteractor.SaveDataSharedPreferences -> {
+                saveLoginSecurePreferences(interactor.user, interactor.password)
+            }
+        }
+    }
+
+    private fun saveLoginSecurePreferences(user: String, password: String) {
+        if (useCase.validateAllFields(validators) && useCase.ammountFieldsValidate(validators)) {
+            state.postValue(LoginStates.SaveLoginSecurePreferences(user, password))
+        }
+    }
+
+    private fun getValuesSharedPreferences(username: String?, password: String?) {
+        if (useCase.verifyUserPasswordIsNull(username, password)) {
+            state.postValue(LoginStates.GetValuesSharedPreference(username, password))
+        } else {
+            state.postValue(LoginStates.SharePreferencesEmpty)
         }
     }
 
@@ -98,12 +116,6 @@ class LoginViewModel : ViewModel() {
                     state.postValue(LoginStates.PasswordError)
                 }
             }
-        }
-    }
-
-    private fun saveUserAndPasswordSharedPreferences() {
-        if (useCase.validateAllFields(validators)) {
-            state.postValue(LoginStates.SaveUserAndPasswordSharedPreferences)
         }
     }
 }

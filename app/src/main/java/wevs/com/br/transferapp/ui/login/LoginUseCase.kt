@@ -9,9 +9,6 @@ class LoginUseCase {
         return array.isNullOrEmpty()
     }
 
-    fun verifyUserPasswordIsNull(user: String, password: String): Boolean =
-        user.isNotEmpty() && password.isNotEmpty()
-
     fun validateAllFields(validators: ArrayList<ValidatorFields>): Boolean {
         var formIsValid = true
         for (validator in validators) {
@@ -23,4 +20,7 @@ class LoginUseCase {
     fun ammountFieldsValidate(validators: ArrayList<ValidatorFields>): Boolean {
         return validators.size == 2
     }
+
+    fun verifyUserPasswordIsNull(username: String?, password: String?): Boolean =
+        !username.isNullOrEmpty() && !password.isNullOrEmpty()
 }

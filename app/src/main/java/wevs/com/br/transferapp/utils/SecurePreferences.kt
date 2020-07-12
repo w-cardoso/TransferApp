@@ -1,3 +1,5 @@
+package wevs.com.br.transferapp.utils
+
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
@@ -9,7 +11,7 @@ import javax.crypto.spec.SecretKeySpec
 
 class SecurePreferences
 /**
- * This will initialize an instance of the SecurePreferences class
+ * This will initialize an instance of the wevs.com.br.transferapp.utils.SecurePreferences class
  * @param context your current context.
  * @param preferenceName name of preferences file (preferenceName.xml)
  * @param secureKey the key used for encryption, finding a good key scheme is hard.
@@ -55,9 +57,13 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
 
             this.encryptKeys = encryptKeys
         } catch (e: GeneralSecurityException) {
-            throw SecurePreferencesException(e)
+            throw SecurePreferencesException(
+                e
+            )
         } catch (e: UnsupportedEncodingException) {
-            throw SecurePreferencesException(e)
+            throw SecurePreferencesException(
+                e
+            )
         }
 
     }
@@ -80,7 +86,9 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
     @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class)
     protected fun getSecretKey(key: String): SecretKeySpec {
         val keyBytes = createKeyBytes(key)
-        return SecretKeySpec(keyBytes, TRANSFORMATION)
+        return SecretKeySpec(keyBytes,
+            TRANSFORMATION
+        )
     }
 
     @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class)
@@ -92,7 +100,7 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
 
     fun put(key: String, value: String?) {
         if (value == null) {
-            preferences.edit().remove(toKey(key)).commit()
+            preferences.edit().remove(toKey(key)).apply()
         } else {
             putValue(toKey(key), value)
         }
@@ -103,7 +111,7 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
     }
 
     fun removeValue(key: String) {
-        preferences.edit().remove(toKey(key)).commit()
+        preferences.edit().remove(toKey(key)).apply()
     }
 
     @Throws(SecurePreferencesException::class)
@@ -116,7 +124,7 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
     }
 
     fun clear() {
-        preferences.edit().clear().commit()
+        preferences.edit().clear().apply()
     }
 
     private fun toKey(key: String): String {
@@ -129,8 +137,7 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
     @Throws(SecurePreferencesException::class)
     private fun putValue(key: String, value: String) {
         val secureValueEncoded = encrypt(value, writer)
-
-        preferences.edit().putString(key, secureValueEncoded).commit()
+        preferences.edit().putString(key, secureValueEncoded).apply()
     }
 
     @Throws(SecurePreferencesException::class)
@@ -138,9 +145,15 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
 
         val secureValue: ByteArray
         try {
-            secureValue = convert(writer, value.toByteArray(charset(CHARSET)))
+            secureValue =
+                convert(
+                    writer,
+                    value.toByteArray(charset(CHARSET))
+                )
         } catch (e: UnsupportedEncodingException) {
-            throw SecurePreferencesException(e)
+            throw SecurePreferencesException(
+                e
+            )
         }
 
         return Base64.encodeToString(secureValue, Base64.NO_WRAP)
@@ -148,11 +161,17 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
 
     protected fun decrypt(securedEncodedValue: String?): String {
         val securedValue = Base64.decode(securedEncodedValue, Base64.NO_WRAP)
-        val value = convert(reader, securedValue)
+        val value =
+            convert(
+                reader,
+                securedValue
+            )
         try {
             return String(value, charset(CHARSET))
         } catch (e: UnsupportedEncodingException) {
-            throw SecurePreferencesException(e)
+            throw SecurePreferencesException(
+                e
+            )
         }
 
     }
@@ -170,7 +189,9 @@ constructor(context: Context, preferenceName: String, secureKey: String, encrypt
             try {
                 return cipher.doFinal(bs)
             } catch (e: Exception) {
-                throw SecurePreferencesException(e)
+                throw SecurePreferencesException(
+                    e
+                )
             }
 
         }

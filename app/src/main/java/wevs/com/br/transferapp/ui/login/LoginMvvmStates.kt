@@ -13,9 +13,9 @@ sealed class LoginStates {
     object PasswordError : LoginStates()
     object EnableButton : LoginStates()
     object DisableButton : LoginStates()
-    object ContainsDateSharedPreferences : LoginStates()
+    data class GetValuesSharedPreference(val user: String?, val password: String?) : LoginStates()
+    data class SaveLoginSecurePreferences(val user: String?, val password: String?) : LoginStates()
     object SharePreferencesEmpty : LoginStates()
-    object SaveUserAndPasswordSharedPreferences : LoginStates()
 }
 
 sealed class LoginEvent {
@@ -26,6 +26,8 @@ sealed class LoginInteractor {
     data class PostLogin(val login: Login) : LoginInteractor()
     data class ValidateFieldUser(val user: EditText) : LoginInteractor()
     data class ValidateFieldPassword(val password: EditText) : LoginInteractor()
-    data class SaveDataSharedPreferences(val user: EditText) : LoginInteractor()
+    data class SaveDataSharedPreferences(val user: String, val password: String) : LoginInteractor()
     object EnableButtonLogin : LoginInteractor()
+    data class GetValuesUserAndPassword(val username: String?, val password: String?) :
+        LoginInteractor()
 }
