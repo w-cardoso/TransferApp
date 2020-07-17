@@ -1,8 +1,6 @@
 package wevs.com.br.transferapp.validator
 
-import android.widget.EditText
-
-class EmailValidator(private val fieldEmail: EditText) : ValidatorFields {
+class EmailValidator(private val fieldEmail: String) : ValidatorFields {
     private fun standardValidate(email: String): Boolean {
         if (email.matches(".+@.+\\..+".toRegex())) {
             return true
@@ -10,8 +8,5 @@ class EmailValidator(private val fieldEmail: EditText) : ValidatorFields {
         return false
     }
 
-    override fun isValid(): Boolean {
-        val email = fieldEmail.text.toString()
-        return standardValidate(email)
-    }
+    override fun isValid(): Boolean = standardValidate(fieldEmail)
 }

@@ -1,8 +1,6 @@
 package wevs.com.br.transferapp.validator
 
-import android.widget.EditText
-
-class PasswordValidator(private val fieldPassword: EditText) : ValidatorFields {
+class PasswordValidator(private val fieldPassword: String) : ValidatorFields {
     private fun standardValidate(password: String): Boolean {
         if (password.matches("((?=.*\\d)(?=.*[A-Z])(?=.*\\W).{8,16})".toRegex())) {
             return true
@@ -10,8 +8,5 @@ class PasswordValidator(private val fieldPassword: EditText) : ValidatorFields {
         return false
     }
 
-    override fun isValid(): Boolean {
-        val password = fieldPassword.text.toString()
-        return standardValidate(password)
-    }
+    override fun isValid(): Boolean = standardValidate(fieldPassword)
 }

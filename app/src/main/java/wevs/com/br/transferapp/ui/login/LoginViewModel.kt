@@ -1,17 +1,12 @@
 package wevs.com.br.transferapp.ui.login
 
-import android.view.View
-import android.widget.EditText
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import wevs.com.br.transferapp.model.Login
 import wevs.com.br.transferapp.repository.LoginRepositoryImplements
-import wevs.com.br.transferapp.validator.EmailValidator
-import wevs.com.br.transferapp.validator.PasswordValidator
-import wevs.com.br.transferapp.validator.ValidatorFields
 
 class LoginViewModel : ViewModel() {
     private val repository: LoginRepositoryImplements by lazy { providerLoginReposytory() }
@@ -20,9 +15,6 @@ class LoginViewModel : ViewModel() {
     private val event: MutableLiveData<LoginEvent> = MutableLiveData()
 
     val viewStates: LiveData<LoginStates> = state
-    val viewEvent: LiveData<LoginEvent> = event
-
-    private val validators = ArrayList<ValidatorFields>()
 
     fun interpret(interactor: LoginInteractor) {
         when (interactor) {
@@ -39,10 +31,10 @@ class LoginViewModel : ViewModel() {
             }
 
             is LoginInteractor.EnableButtonLogin -> {
-                enableButton()
+                enableButton(interactor.user, interactor.password)
             }
 
-            is LoginInteractor.GetValuesUserAndPassword -> {
+            is LoginInteractor.GetValues -> {
                 getValuesSharedPreferences(interactor.username, interactor.password)
             }
 
@@ -53,7 +45,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun saveLoginSecurePreferences(user: String, password: String) {
-        if (useCase.validateAllFields(validators) && useCase.ammountFieldsValidate(validators)) {
+        if (useCase.validateUser(user) && useCase.validatePassword(password)) {
             state.postValue(LoginStates.SaveLoginSecurePreferences(user, password))
         }
     }
@@ -61,21 +53,36 @@ class LoginViewModel : ViewModel() {
     private fun getValuesSharedPreferences(username: String?, password: String?) {
         if (useCase.verifyUserPasswordIsNull(username, password)) {
             state.postValue(LoginStates.GetValuesSharedPreference(username, password))
-        } else {
-            state.postValue(LoginStates.SharePreferencesEmpty)
         }
     }
 
-    private fun enableButton() {
-        if (useCase.validateAllFields(validators) && useCase.ammountFieldsValidate(validators)) {
+    private fun enableButton(user: String, password: String) {
+        if (useCase.validateUser(user) && useCase.validatePassword(password)) {
             state.postValue(LoginStates.EnableButton)
         } else {
             state.postValue(LoginStates.DisableButton)
         }
     }
 
+    private fun validateFieldUser(user: String) {
+        if (useCase.validateUser(user)) {
+            state.postValue(LoginStates.UserSucess)
+        } else {
+            state.postValue(LoginStates.UserError)
+        }
+
+    }
+
+    private fun validateFieldPassword(password: String) {
+        if (useCase.validatePassword(password)) {
+            state.postValue(LoginStates.PasswordSucess)
+        } else {
+            state.postValue(LoginStates.PasswordError)
+        }
+    }
+
     private fun sendPostLogin(login: Login) {
-        GlobalScope.launch {
+        viewModelScope.launch {
             repository.sendLogin(
                 login,
                 {
@@ -88,34 +95,6 @@ class LoginViewModel : ViewModel() {
                 {
                     state.postValue(LoginStates.CallError(it.message ?: ""))
                 })
-        }
-    }
-
-    private fun validateFieldUser(edtUser: EditText) {
-        val validator = EmailValidator(edtUser)
-        validators.add(validator)
-        edtUser.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                if (validator.isValid()) {
-                    state.postValue(LoginStates.UserSucess(edtUser))
-                } else {
-                    state.postValue(LoginStates.UserError)
-                }
-            }
-        }
-    }
-
-    private fun validateFieldPassword(edtPassword: EditText) {
-        val validator = PasswordValidator(edtPassword)
-        validators.add(validator)
-        edtPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                if (validator.isValid()) {
-                    state.postValue(LoginStates.PasswordSucess(edtPassword))
-                } else {
-                    state.postValue(LoginStates.PasswordError)
-                }
-            }
         }
     }
 }

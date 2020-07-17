@@ -1,7 +1,8 @@
 package wevs.com.br.transferapp.ui.login
 
 import wevs.com.br.transferapp.model.UserAccount
-import wevs.com.br.transferapp.validator.ValidatorFields
+import wevs.com.br.transferapp.validator.EmailValidator
+import wevs.com.br.transferapp.validator.PasswordValidator
 
 class LoginUseCase {
     fun verifyUserAccount(userAccount: UserAccount): Boolean {
@@ -9,16 +10,14 @@ class LoginUseCase {
         return array.isNullOrEmpty()
     }
 
-    fun validateAllFields(validators: ArrayList<ValidatorFields>): Boolean {
-        var formIsValid = true
-        for (validator in validators) {
-            if (!validator.isValid()) formIsValid = false
-        }
-        return formIsValid
+    fun validateUser(username: String): Boolean {
+        val validateUser = EmailValidator(username)
+        return validateUser.isValid()
     }
 
-    fun ammountFieldsValidate(validators: ArrayList<ValidatorFields>): Boolean {
-        return validators.size == 2
+    fun validatePassword(password: String): Boolean {
+        val validatePassword = PasswordValidator(password)
+        return validatePassword.isValid()
     }
 
     fun verifyUserPasswordIsNull(username: String?, password: String?): Boolean =

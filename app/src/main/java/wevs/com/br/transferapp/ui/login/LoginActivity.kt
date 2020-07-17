@@ -1,6 +1,8 @@
 package wevs.com.br.transferapp.ui.login
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,7 +16,6 @@ import wevs.com.br.transferapp.utils.*
 
 class LoginActivity : AppCompatActivity() {
     private val viewModel by lazy { providerLoginViewModel(this) }
-
     private val edtUser by lazy { findViewById<CustomEditText>(R.id.login_edt_user) }
     private val edtPassword by lazy { findViewById<CustomEditText>(R.id.login_edt_password) }
     private val btnLogin by lazy { findViewById<Button>(R.id.login_btn) }
@@ -22,7 +23,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         val (username, password) = startSecurePreferences()
-        viewModel.interpret(LoginInteractor.GetValuesUserAndPassword(username, password))
+        viewModel.interpret(LoginInteractor.GetValues(username, password))
     }
 
     private fun startSecurePreferences(): Pair<String?, String?> {
@@ -38,7 +39,42 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         starViewModel()
+        userTextChangedListener()
+        passwordTextChangedListener()
         clickListenerBtnLogin()
+    }
+
+    private fun userTextChangedListener() {
+        edtUser.editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.interpret(LoginInteractor.ValidateFieldUser(s.toString()))
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //empty
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                //empty
+            }
+        })
+    }
+
+    private fun passwordTextChangedListener() {
+        edtPassword.editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.interpret(LoginInteractor.ValidateFieldPassword(s.toString()))
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //empty
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //empty
+            }
+
+        })
     }
 
     private fun clickListenerBtnLogin() {
@@ -98,46 +134,57 @@ class LoginActivity : AppCompatActivity() {
                     is LoginStates.SaveLoginSecurePreferences -> {
                         saveUserPassword(it.user, it.password)
                     }
-
-                    is LoginStates.SharePreferencesEmpty -> {
-                        securePreferencesEmpty()
-                    }
                 }
             }
 
         })
     }
 
-    private fun securePreferencesEmpty() {
-        viewModel.interpret(LoginInteractor.ValidateFieldUser(edtUser.editText))
-        viewModel.interpret(LoginInteractor.ValidateFieldPassword(edtPassword.editText))
-    }
-
     private fun populateEditText(user: String?, password: String?) {
         edtUser.editText.setText(user)
         edtPassword.editText.setText(password)
-        viewModel.interpret(LoginInteractor.ValidateFieldUser(edtUser.editText))
-        viewModel.interpret(LoginInteractor.ValidateFieldPassword(edtPassword.editText))
+        startInterectorEnableButtonLogin(user ?: "", password ?: "")
+    }
+
+    private fun startInterectorEnableButtonLogin(user: String, password: String) {
+        viewModel.interpret(
+            LoginInteractor.EnableButtonLogin(
+                user, password
+            )
+        )
     }
 
     private fun userOk() {
         edtUser.hideError()
-        viewModel.interpret(LoginInteractor.EnableButtonLogin)
+        startInterectorEnableButtonLogin(
+            edtUser.editText.text.toString(),
+            edtPassword.editText.text.toString()
+        )
+
     }
 
     private fun userNok() {
         edtUser.showError()
-        disableButtonLogin()
+        startInterectorEnableButtonLogin(
+            edtUser.editText.text.toString(),
+            edtPassword.editText.text.toString()
+        )
     }
 
     private fun passwordOk() {
         edtPassword.hideError()
-        viewModel.interpret(LoginInteractor.EnableButtonLogin)
+        startInterectorEnableButtonLogin(
+            edtUser.editText.text.toString(),
+            edtPassword.editText.text.toString()
+        )
     }
 
     private fun passwordNok() {
         edtPassword.showError()
-        disableButtonLogin()
+        startInterectorEnableButtonLogin(
+            edtUser.editText.text.toString(),
+            edtPassword.editText.text.toString()
+        )
     }
 
     private fun disableButtonLogin() {
