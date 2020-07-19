@@ -16,10 +16,6 @@ sealed class LoginStates {
     data class SaveLoginSecurePreferences(val user: String?, val password: String?) : LoginStates()
 }
 
-sealed class LoginEvent {
-    data class goToHomeActivity(val user: UserAccount) : LoginEvent()
-}
-
 sealed class LoginInteractor {
     data class GetValues(val username: String?, val password: String?) : LoginInteractor()
     data class ValidateFieldUser(val user: String) : LoginInteractor()

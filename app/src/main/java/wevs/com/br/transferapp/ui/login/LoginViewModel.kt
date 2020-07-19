@@ -12,36 +12,26 @@ class LoginViewModel : ViewModel() {
     private val repository: LoginRepositoryImplements by lazy { providerLoginReposytory() }
     private val useCase: LoginUseCase by lazy { providerLoginUseCase() }
     private val state: MutableLiveData<LoginStates> = MutableLiveData()
-    private val event: MutableLiveData<LoginEvent> = MutableLiveData()
-
     val viewStates: LiveData<LoginStates> = state
 
-    fun interpret(interactor: LoginInteractor) {
-        when (interactor) {
-            is LoginInteractor.PostLogin -> {
-                sendPostLogin(interactor.login)
-            }
+    fun interpret(interactor: LoginInteractor) = when (interactor) {
+        is LoginInteractor.PostLogin -> sendPostLogin(interactor.login)
 
-            is LoginInteractor.ValidateFieldUser -> {
-                validateFieldUser(interactor.user)
-            }
+        is LoginInteractor.ValidateFieldUser -> validateFieldUser(interactor.user)
 
-            is LoginInteractor.ValidateFieldPassword -> {
-                validateFieldPassword(interactor.password)
-            }
+        is LoginInteractor.ValidateFieldPassword -> validateFieldPassword(interactor.password)
 
-            is LoginInteractor.EnableButtonLogin -> {
-                enableButton(interactor.user, interactor.password)
-            }
+        is LoginInteractor.EnableButtonLogin -> enableButton(interactor.user, interactor.password)
 
-            is LoginInteractor.GetValues -> {
-                getValuesSharedPreferences(interactor.username, interactor.password)
-            }
+        is LoginInteractor.GetValues -> getValuesSharedPreferences(
+            interactor.username,
+            interactor.password
+        )
 
-            is LoginInteractor.SaveDataSharedPreferences -> {
-                saveLoginSecurePreferences(interactor.user, interactor.password)
-            }
-        }
+        is LoginInteractor.SaveDataSharedPreferences -> saveLoginSecurePreferences(
+            interactor.user,
+            interactor.password
+        )
     }
 
     private fun saveLoginSecurePreferences(user: String, password: String) {
