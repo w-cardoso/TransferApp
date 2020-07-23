@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="placeholder_color">#a0a0a0</color>
+
+
+    <color name="positive_color">#4AAFFF</color>
+    <color name="negative_color">#FF1F0E</color>
 </resources>
