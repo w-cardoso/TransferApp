@@ -26,15 +26,6 @@ class LoginActivity : AppCompatActivity() {
         viewModel.interpret(LoginInteractor.GetValues(username, password))
     }
 
-    private fun startSecurePreferences(): Pair<String?, String?> {
-        val preferences = SecurePreferences(
-            this, PREFERENCE_NAME, SECURE_KEY, true
-        )
-        val username = preferences.getString(USER_SECURE_PREFERENCES)
-        val password = preferences.getString(PASSWORD_SECURE_PREFERENCES)
-        return Pair(username, password)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,6 +33,53 @@ class LoginActivity : AppCompatActivity() {
         userTextChangedListener()
         passwordTextChangedListener()
         clickListenerBtnLogin()
+    }
+
+    private fun starViewModel() {
+        viewModel.viewStates.observe(this, Observer { viewStates ->
+            viewStates.let {
+                when (it) {
+                    is LoginStates.GetValuesSharedPreference ->
+                        populateEditText(it.user, it.password)
+
+                    is LoginStates.CallSucess -> {
+                        viewModel.interpret(
+                            LoginInteractor.SaveDataSharedPreferences(
+                                edtUser.editText.text.toString(),
+                                edtPassword.editText.text.toString()
+                            )
+                        )
+                        sendLogin(it.user)
+                    }
+
+                    is LoginStates.CallError -> sendLoginError(it.mesage)
+
+                    is LoginStates.UserSucess -> userOk()
+
+                    is LoginStates.UserError -> userNok()
+
+                    is LoginStates.PasswordSucess -> passwordOk()
+
+                    is LoginStates.PasswordError -> passwordNok()
+
+                    is LoginStates.EnableButton -> enableButtonLogin()
+
+                    is LoginStates.DisableButton -> disableButtonLogin()
+
+                    is LoginStates.SaveLoginSecurePreferences ->
+                        saveUserPassword(it.user, it.password)
+                }
+            }
+        })
+    }
+
+    private fun startSecurePreferences(): Pair<String?, String?> {
+        val preferences = SecurePreferences(
+            this, PREFERENCE_NAME, SECURE_KEY, true
+        )
+        val username = preferences.getString(USER_SECURE_PREFERENCES)
+        val password = preferences.getString(PASSWORD_SECURE_PREFERENCES)
+        return Pair(username, password)
     }
 
     private fun userTextChangedListener() {
@@ -88,56 +126,6 @@ class LoginActivity : AppCompatActivity() {
                 )
             )
         }
-    }
-
-    private fun starViewModel() {
-        viewModel.viewStates.observe(this, Observer { viewStates ->
-            viewStates.let {
-                when (it) {
-                    is LoginStates.GetValuesSharedPreference -> {
-                        populateEditText(it.user, it.password)
-                    }
-
-                    is LoginStates.CallSucess -> {
-                        viewModel.interpret(
-                            LoginInteractor.SaveDataSharedPreferences(
-                                edtUser.editText.text.toString(),
-                                edtPassword.editText.text.toString()
-                            )
-                        )
-                        sendLogin(it.user)
-                    }
-                    is LoginStates.CallError -> {
-                        sendLoginError(it.mesage)
-                    }
-                    is LoginStates.UserSucess -> {
-                        userOk()
-                    }
-                    is LoginStates.UserError -> {
-                        userNok()
-                    }
-                    is LoginStates.PasswordSucess -> {
-                        passwordOk()
-                    }
-                    is LoginStates.PasswordError -> {
-                        passwordNok()
-                    }
-
-                    is LoginStates.EnableButton -> {
-                        enableButtonLogin()
-                    }
-
-                    is LoginStates.DisableButton -> {
-                        disableButtonLogin()
-                    }
-
-                    is LoginStates.SaveLoginSecurePreferences -> {
-                        saveUserPassword(it.user, it.password)
-                    }
-                }
-            }
-
-        })
     }
 
     private fun populateEditText(user: String?, password: String?) {

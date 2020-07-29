@@ -12,6 +12,7 @@ import wevs.com.br.transferapp.R
 import wevs.com.br.transferapp.model.StatementResponse
 import wevs.com.br.transferapp.model.UserAccount
 import wevs.com.br.transferapp.ui.home.adapter.HomeAdapter
+import wevs.com.br.transferapp.utils.EMPTY
 import wevs.com.br.transferapp.utils.USER_ACCOUNT_KEY
 import wevs.com.br.transferapp.utils.formatToBrazilianCurrency
 
@@ -63,13 +64,14 @@ class HomeActivity : AppCompatActivity() {
     private fun populateViews(user: UserAccount?) {
         findViewById<TextView>(R.id.home_txt_name).text = user?.name
 
-        findViewById<TextView>(R.id.home_txt_account).text = getString(
-            R.string.home_agency_account,
-            user?.bankAccount.toString(), user?.agency
-        )
+        findViewById<TextView>(R.id.home_txt_account).text =
+            getString(
+                R.string.home_agency_account,
+                user?.bankAccount.toString(), user?.agency
+            )
 
         findViewById<TextView>(R.id.home_txt_balance).text =
-            user?.balance?.formatToBrazilianCurrency() ?: ""
+            user?.balance?.formatToBrazilianCurrency() ?: EMPTY
 
         viewModel.interpret(HomeInteractor.GetStatementList(user?.userId))
     }

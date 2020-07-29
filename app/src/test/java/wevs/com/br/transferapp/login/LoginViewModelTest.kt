@@ -11,6 +11,10 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
+import wevs.com.br.transferapp.model.Login
+import wevs.com.br.transferapp.repository.LoginRepositoryImplements
+import wevs.com.br.transferapp.retrofit.RetrofitSetups
+import wevs.com.br.transferapp.service.LoginService
 import wevs.com.br.transferapp.ui.login.*
 
 
@@ -22,6 +26,9 @@ class LoginViewModelTest {
     @Mock
     lateinit var observer: Observer<LoginStates>
     private val viewModel: LoginViewModel = LoginViewModel()
+    private val service: LoginService = RetrofitSetups().loginService
+    private val repository: LoginRepositoryImplements = providerLoginReposytory()
+
 
     @Suppress("UNCHECKED_CAST")
     @Before
@@ -30,6 +37,10 @@ class LoginViewModelTest {
         observer = mock(Observer::class.java) as Observer<LoginStates>
         mockkStatic("wevs.com.br.transferapp.ui.login.LoginProvider")
         coEvery { providerLoginUseCase() } returns LoginUseCase()
+        coEvery { providerLoginReposytory() } returns LoginRepositoryImplements(service)
+        coEvery { repository.sendLogin(Login("wevs@gmail.com", "Wevs@gmail334"),
+            {}, {})
+        }
     }
 
 
@@ -105,8 +116,18 @@ class LoginViewModelTest {
     @Test
     fun checkPostLoginOk() {
         runBlocking {
+
         }
         viewModel.viewStates.observeForever(observer)
+        viewModel.interpret(
+            LoginInteractor.PostLogin(
+                Login(
+                    "wevs@gmail.com",
+                    "Wevs@gmail334"
+                )
+            )
+        )
+        verify(observer).onChanged(isA(LoginStates.CallSucess::class.java))
     }
 
     @Test
@@ -114,5 +135,14 @@ class LoginViewModelTest {
         runBlocking {
         }
         viewModel.viewStates.observeForever(observer)
+        viewModel.interpret(
+            LoginInteractor.PostLogin(
+                Login(
+                    "wevs@gmail.com",
+                    "Wevs@gmail334"
+                )
+            )
+        )
+        verify(observer).onChanged(isA(LoginStates.CallSucess::class.java))
     }
 }
